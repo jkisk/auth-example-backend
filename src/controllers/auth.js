@@ -16,7 +16,23 @@ const jwt = require('jsonwebtoken')
 //////////////////////////////////////////////////////////////////////////////
 
 function login(req, res, next){
+  if(!req.body.username) {
+    return next({status: 400, message: "bad request"})
+  }
+  if(!req.body.password) {
+    return next({status: 400, messeage: "bad request"})
+  }
 
+authModel.login(req.body.username, req.body.password)
+.then(function(user) {
+  const token = jwt.sign({id: user.id}, process.env.SECRET)
+  return res.status(200).send({token})
+})
+.catch(next)
+}
+
+function getAuthStatus(req, res, next){
+  res.status(200).send({id:req.claim.id})
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -55,5 +71,6 @@ function isSelf(req, res, next){
 module.exports = {
   login,
   isAuthenticated,
-  isSelf
+  isSelf,
+  getAuthStatus
 }
